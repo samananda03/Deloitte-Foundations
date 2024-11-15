@@ -1,0 +1,38 @@
+#spring:
+#  application:
+#    name: productsapp
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/productsapp
+#    username: root
+#    password: root
+#    driverClassName: com.mysql.cj.jdbc.Driver
+#  jpa:
+#    show-sql: true
+#    hibernate:
+#      format_sql: true
+#      ddl-auto: update
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/bankDatabase
+    username: root
+    password: Saman@03
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    try-it-out-enabled: false
+    default-model-expand-depth: -1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: [ "prometheus" ]
