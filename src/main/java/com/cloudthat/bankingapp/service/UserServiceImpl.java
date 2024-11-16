@@ -1,6 +1,4 @@
-
 package com.cloudthat.bankingapp.service;
-
 
 import com.cloudthat.bankingapp.entity.User;
 import com.cloudthat.bankingapp.entity.VerificationToken;
@@ -16,12 +14,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
 
-
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
@@ -34,9 +32,8 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User registerUser(UserModel userModel) {
-        // TODO Auto-generated method stub
         User user = new User();
-        user.setEmailId(userModel.getEmail());
+        user.setEmail(userModel.getEmail());
         user.setFirstName(userModel.getFirstName());
         user.setLastName(userModel.getLastName());
         user.setRole(userModel.getRole());
@@ -46,44 +43,36 @@ public class UserServiceImpl implements UserService{
             userRepository.save(user);
             return user;
         } catch (DataIntegrityViolationException e) {
-            // TODO: handle exception
-            throw new DataIntegrityViolationException(null);
+            throw new DataIntegrityViolationException("Email already exists.");
         }
-
     }
 
     @Override
     public void saveVerificationTokenForUser(String token, User user) {
-        // TODO Auto-generated method stub\
-        VerificationToken verificationToken = new VerificationToken(token,user);
+        VerificationToken verificationToken = new VerificationToken(token, user);
         verificationTokenRepository.save(verificationToken);
-
     }
 
     @Override
     public String validateVerificationToken(String token) {
-        // TODO Auto-generated method stub
         VerificationToken verificationToken = verificationTokenRepository.findByToken(token);
-        if(verificationToken == null) {
+        if (verificationToken == null) {
             return "invalid";
         }
 
         User user = verificationToken.getUser();
         Calendar calendar = Calendar.getInstance();
-
-        if(verificationToken.getExpirationTime().getTime() - calendar.getTime().getTime() <=0) {
+        if (verificationToken.getExpirationTime().getTime() - calendar.getTime().getTime() <= 0) {
             return "expired";
         }
 
         user.setIsActive(true);
         userRepository.save(user);
-
         return "valid";
     }
 
     @Override
-    public com.cloudthat.bankingapp.entity.VerificationToken generateNewVerificationToken(String oldToken) {
-        // TODO Auto-generated method stub
+    public VerificationToken generateNewVerificationToken(String oldToken) {
         VerificationToken verificationToken = verificationTokenRepository.findByToken(oldToken);
         verificationToken.setToken(UUID.randomUUID().toString());
         verificationTokenRepository.save(verificationToken);
@@ -92,128 +81,84 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public Boolean existsByEmail(String email) {
-        // TODO Auto-generated method stub
-        return userRepository.existsByEmailId(email);
+        return userRepository.existsByEmail(email);  // Ensuring repository method matches
     }
 
     @Override
     public UserProfile getUserProfile(Long id) {
         UserProfile userProfile;
         try {
-            // TODO Auto-generated method stub
-            User user = userRepository.findById(id).get();
-
-            if(!user.getIsActive()) {
+            User user = userRepository.findById(id).orElseThrow(() -> new NoSuchElementException("User not found"));
+            if (!user.getIsActive()) {
                 throw new DisabledException("User account is Disabled");
             }
-            userProfile = new UserProfile();
-            userProfile.setId(id);
-            userProfile.setEmail(user.getEmailId());
-            userProfile.setFirstName(user.getFirstName());
-            userProfile.setLastName(user.getLastName());
-            userProfile.setPhoneNumber(user.getPhoneNumber());
-            userProfile.setProfilePicture(user.getProfilePicture());
-            userProfile.setRole(user.getRole());
-        } catch (Exception e) {
-            // TODO: handle exception
-            throw new ResourceNotFoundException("User","Id", id);
+
+            userProfile = new UserProfile(user.getId(), user.getFirstName(), user.getEmail(), user.getRole(),
+                    user.getLastName(), user.getProfilePicture(), user.getPhoneNumber());
+        } catch (NoSuchElementException e) {
+            throw new ResourceNotFoundException("User", "Id", id);
         }
         return userProfile;
     }
 
     @Override
     public UserProfile updateUserProfile(Long id, UserProfile userProfile) {
-        // TODO Auto-generated method stub
-        User userDB;
-        try {
-            userDB = userRepository.findById(id).get();
-            if (!userDB.getIsActive()) {
-                throw new DisabledException("User account is Disabled");
-            }
-            // Note: we will not update Email Id, first Name, Role
-            if (Objects.nonNull(userProfile.getLastName()) && !"".equalsIgnoreCase(userProfile.getLastName())) {
-                userDB.setLastName(userProfile.getLastName());
-            }
-            if (Objects.nonNull(userProfile.getProfilePicture())
-                    && !"".equalsIgnoreCase(userProfile.getProfilePicture())) {
-                userDB.setProfilePicture(userProfile.getProfilePicture());
-            }
-            if (Objects.nonNull(userProfile.getPhoneNumber()) && !"".equalsIgnoreCase(userProfile.getPhoneNumber())) {
-                userDB.setPhoneNumber(userProfile.getPhoneNumber());
-            }
-
-            userRepository.save(userDB);
-
-            userProfile = new UserProfile();
-            userProfile.setId(id);
-            userProfile.setEmail(userDB.getEmailId());
-            userProfile.setFirstName(userDB.getFirstName());
-            userProfile.setLastName(userDB.getLastName());
-            userProfile.setPhoneNumber(userDB.getPhoneNumber());
-            userProfile.setProfilePicture(userDB.getProfilePicture());
-            userProfile.setRole(userDB.getRole());
-
-        } catch(NullPointerException ex){
-            throw new ResourceNotFoundException("User","id", id);
-        }catch (DataIntegrityViolationException e) {
-            // TODO: handle exception
-            throw new DataIntegrityViolationException(null);
+        User userDB = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+        if (!userDB.getIsActive()) {
+            throw new DisabledException("User account is Disabled");
         }
 
-        return userProfile;
+        if (Objects.nonNull(userProfile.getLastName()) && !"".equalsIgnoreCase(userProfile.getLastName())) {
+            userDB.setLastName(userProfile.getLastName());
+        }
+        if (Objects.nonNull(userProfile.getProfilePicture()) && !"".equalsIgnoreCase(userProfile.getProfilePicture())) {
+            userDB.setProfilePicture(userProfile.getProfilePicture());
+        }
+        if (Objects.nonNull(userProfile.getPhoneNumber()) && !"".equalsIgnoreCase(userProfile.getPhoneNumber())) {
+            userDB.setPhoneNumber(userProfile.getPhoneNumber());
+        }
 
+        userRepository.save(userDB);
+
+        return new UserProfile(userDB.getId(), userDB.getFirstName(), userDB.getEmail(), userDB.getRole(),
+                userDB.getLastName(), userDB.getProfilePicture(), userDB.getPhoneNumber());
     }
 
     @Override
     public void deleteUserProfile(Long id) {
-        User userDB;
-        try {
-            userDB = userRepository.findById(id).get();
-            if (!userDB.getIsActive()) {
-                throw new DisabledException("User account is Disabled");
-            }
-            userDB.setIsActive(false);
-
-            userRepository.save(userDB);
-        } catch(NullPointerException ex){
-            throw new ResourceNotFoundException("User","id", id);
-        }catch (DataIntegrityViolationException e) {
-            // TODO: handle exception
-            throw new DataIntegrityViolationException(null);
+        User userDB = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+        if (!userDB.getIsActive()) {
+            throw new DisabledException("User account is Disabled");
         }
+
+        userDB.setIsActive(false);
+        userRepository.save(userDB);
     }
 
     @Override
     public UserProfile getUserProfile(String email) {
-        // TODO Auto-generated method stub
         UserProfile userProfile;
         try {
-            // TODO Auto-generated method stub
-            User user = userRepository.findByEmailId(email);
-
-            if(!user.getIsActive()) {
+            User user = userRepository.findByEmail(email);  // Match method name with repository
+            if (!user.getIsActive()) {
                 throw new DisabledException("User account is Disabled");
             }
-            userProfile = new UserProfile();
-            userProfile.setId(user.getId());
-            userProfile.setEmail(user.getEmailId());
-            userProfile.setFirstName(user.getFirstName());
-            userProfile.setLastName(user.getLastName());
-            userProfile.setPhoneNumber(user.getPhoneNumber());
-            userProfile.setProfilePicture(user.getProfilePicture());
-            userProfile.setRole(user.getRole());
-        } catch (Exception e) {
-            // TODO: handle exception
-            throw new ResourceNotFoundException("User","Email", email);
+
+            userProfile = new UserProfile(user.getId(), user.getFirstName(), user.getEmail(), user.getRole(),
+                    user.getLastName(), user.getProfilePicture(), user.getPhoneNumber());
+        } catch (NoSuchElementException e) {
+            throw new ResourceNotFoundException("User", "Email", email);
         }
         return userProfile;
     }
 
     @Override
     public VerificationToken getVerificationTokenForUser(Long id) {
-        // TODO Auto-generated method stub
-        VerificationToken verificationToken = verificationTokenRepository.findByUserId(id);
-        return verificationToken;
+        return verificationTokenRepository.findByUserId(id);
     }
 
+    @Override
+    public UserProfile getUserProfileByEmail(String email) {
+        return null;
+    }
 }

@@ -1,10 +1,10 @@
 
-package com.cloudthat.bankingapp.service;
+package com.cloudthat.productsappv2.service;
 
 
-import com.cloudthat.bankingapp.entity.CustomUserDetails;
-import com.cloudthat.bankingapp.entity.User;
-import com.cloudthat.bankingapp.repository.UserRepository;
+import com.cloudthat.productsappv2.entity.CustomUserDetails;
+import com.cloudthat.productsappv2.entity.User;
+import com.cloudthat.productsappv2.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,7 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         // TODO Auto-generated method stub
         User user;
         try {
-            user = userRepository.findByEmail(emailId);
+            user = userRepository.findByEmailId(emailId);
         } catch (Exception e) {
             // TODO: handle exception
             throw new UsernameNotFoundException("User Name Not Found");

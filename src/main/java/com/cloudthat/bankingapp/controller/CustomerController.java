@@ -7,6 +7,7 @@ import com.cloudthat.bankingapp.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,33 +19,39 @@ public class CustomerController {
     @Autowired
     private CustomerService customerService;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/customers")
     public ResponseEntity<ApiResponse> createCustomer(@RequestBody CustomerRequest customerRequest){
         CustomerModel customerModel = customerService.saveCustomer(customerRequest);
         return new ResponseEntity<>(new ApiResponse(true,"Customer Created Successfully", customerModel), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/customers")
     public ResponseEntity<ApiResponse> getAllCustomers(){
         List<CustomerModel> customerModels = customerService.getCustomers();
         return new ResponseEntity<>(new ApiResponse(true,"Customers Fetched Successfully", customerModels), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/customers/{customerId}")
     public ResponseEntity<ApiResponse> getCustomer(@PathVariable("customerId") Long customerId){
         CustomerModel customerModel = customerService.getCustomer(customerId);
         return new ResponseEntity<>(new ApiResponse(true,"Customer Fetch Successful", customerModel), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/customers/{customerId}")
     public ResponseEntity<ApiResponse> updateCustomer(@PathVariable("customerId") Long customerId, @RequestBody CustomerRequest customerRequest){
         CustomerModel customerModel = customerService.updateCustomer(customerId, customerRequest);
         return new ResponseEntity<>(new ApiResponse(true,"Customer Update Successful", customerModel), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/customers/{customerId}")
     public ResponseEntity<ApiResponse> deleteCustomer(@PathVariable("customerId") Long customerId){
         customerService.deleteCustomer(customerId);
         return new ResponseEntity<>(new ApiResponse(true,"Customer Delete Successful", ""), HttpStatus.OK);
     }
 }
+

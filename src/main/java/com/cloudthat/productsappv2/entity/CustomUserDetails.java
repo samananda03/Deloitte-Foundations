@@ -1,5 +1,5 @@
 
-package com.cloudthat.bankingapp.entity;
+package com.cloudthat.productsappv2.entity;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -42,7 +42,7 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public String getUsername() {
         // TODO Auto-generated method stub
-        return user.getEmail();
+        return user.getEmailId();
     }
 
     @Override

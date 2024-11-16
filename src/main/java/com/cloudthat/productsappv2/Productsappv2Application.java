@@ -1,5 +1,5 @@
 
-package com.cloudthat.bankingapp;
+package com.cloudthat.productsappv2;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

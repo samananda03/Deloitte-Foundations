@@ -1,5 +1,5 @@
 
-package com.cloudthat.bankingapp;
+package com.cloudthat.productsappv2;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
