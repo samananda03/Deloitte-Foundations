@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade calculator</title>
+    <script src="./Lab1.js"></script>
+</head>
+<body>
+    <h2>Know your grade!</h2>
+    <form id="studentForm">
+        <label for="name">Student Name:</label>
+        <input type="text" id="name" required><br><br>
+
+        <label for="program">Program Number:</label>
+        <input type="text" id="program" required><br><br>
+
+        <label for="semester">Semester:</label>
+        <input type="text" id="semester" required><br><br>
+
+        <label for="pythonMarks">Python Marks:</label>
+        <input type="number" id="pythonMarks" max="100" required><br><br>
+
+        <label for="htmlMarks">HTML Marks:</label>
+        <input type="number" id="htmlMarks" max="100" required><br><br>
+
+        <label for="cssMarks">CSS Marks:</label>
+        <input type="number" id="cssMarks" max="100" required><br><br>
+
+        <button type="button" onclick="calculateResult()">Submit</button>
+    </form>
+
+    <p id="output"></p>
+
+    <script src="script.js"></script>
+</body>
+</html>
